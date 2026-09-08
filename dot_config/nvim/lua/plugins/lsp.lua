@@ -79,6 +79,10 @@ return {
 				texlab = {},
 				tailwindcss = {},
 				-- Ensure mason installs the server
+				-- clangd is split into two named configs (clangd for C++, clangd_c for C)
+				-- so that a `.c` buffer never inherits C++ fallback flags/compile
+				-- commands (e.g. from a neighboring .cpp TU), which otherwise leaks
+				-- `class`/`template`/`std::` completions into plain C files.
 				clangd = {
 					keys = {
 						{
@@ -88,7 +92,7 @@ return {
 						},
 					},
 					root_markers = { ".git", ".clangd", "compile_commands.json" },
-					filetypes = { "c", "cpp", "cxx", "hxx", "cc", "hh", "hpp" },
+					filetypes = { "cpp", "cxx", "hxx", "cc", "hh", "hpp" },
 					root_dir = function(bufnr, on_dir)
 						local fname = vim.api.nvim_buf_get_name(bufnr)
 						local root = vim.fs.root(fname, {
@@ -107,14 +111,10 @@ return {
 							on_dir(root)
 						end
 					end,
-					capabilities = {
-						offsetEncoding = { "utf-16" },
-					},
 					cmd = {
 						"clangd",
 						"--background-index",
 						"--clang-tidy",
-						"--offset-encoding=utf-8",
 						"--header-insertion=iwyu",
 						"--completion-style=detailed",
 						"--function-arg-placeholders",
@@ -124,6 +124,7 @@ return {
 						usePlaceholders = true,
 						completeUnimported = true,
 						clangdFileStatus = true,
+						fallbackFlags = { "-xc++", "-std=c++20" },
 					},
 				},
 				astro = {},
@@ -196,6 +197,30 @@ return {
 
 			require("mason").setup()
 			require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
+
+			-- Standalone clangd config for C, kept separate from the C++ one above
+			-- (see comment on `clangd`) so it never picks up C++ fallback flags.
+			vim.lsp.config("clangd_c", {
+				keys = {
+					{
+						"<localleader>h",
+						"<cmd>ClangdSwitchSourceHeader<cr>",
+						desc = "Switch Source/Header (C/C++)",
+					},
+				},
+				root_markers = { ".git", ".clangd", "compile_commands.json" },
+				filetypes = { "c" },
+				root_dir = opts.servers.clangd.root_dir,
+				cmd = opts.servers.clangd.cmd,
+				capabilities = require("blink.cmp").get_lsp_capabilities(),
+				init_options = {
+					usePlaceholders = true,
+					completeUnimported = true,
+					clangdFileStatus = true,
+					fallbackFlags = { "-xc", "-std=c23" },
+				},
+			})
+			vim.lsp.enable("clangd_c")
 
 			-- neocmakelsp configuration
 			vim.lsp.config("neocmake", {

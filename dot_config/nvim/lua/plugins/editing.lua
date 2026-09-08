@@ -65,6 +65,7 @@ return {
       formatters_by_ft = {
         lua = { 'stylua' },
         python = { 'ruff_format', 'ruff_organize_imports' },
+        c = { 'clang-format' },
         cpp = { 'clang-format' },
         --slang = { 'clang-format' },
       },
@@ -102,6 +103,7 @@ return {
   },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    branch = 'main',
     build = ':TSUpdate',
     config = function()
       require('nvim-treesitter').setup {

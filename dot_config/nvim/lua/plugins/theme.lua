@@ -3,6 +3,7 @@ return {
     -- TODO: need to update the colours so the keywords are actually another colour than the method/function name
     -- (C++)
     'pixelsandpointers/dentoushoku.nvim',
+    dir = '~/dev/dentoushoku.nvim/',
     config = function()
       vim.cmd.colorscheme 'enji'
     end,

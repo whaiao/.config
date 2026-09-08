@@ -40,7 +40,7 @@ require('lazy').setup {
 
 -- INFO: Overseer area
 require('overseer').setup {
-  templates = { 'builtin', 'user.cpp_build', 'user.run_blender', 'user.blender_debug_build' },
+  templates = { 'builtin', 'user.c_build', 'user.cpp_build', 'user.run_blender', 'user.blender_debug_build' },
 }
 
 -- Place this in your Neovim config (e.g., init.lua or plugin setup)
